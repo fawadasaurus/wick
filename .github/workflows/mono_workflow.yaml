@@ -47,7 +47,7 @@ jobs:
             exit 1
           fi
         env:
-          GITHUB_REF: ${{ github.ref }}
+          GITHUB_REF: ${{ github.ref_name }}
   test:
     needs: tag
     if: github.event_name != 'push'
