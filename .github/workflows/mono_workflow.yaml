@@ -312,7 +312,7 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           mkdir -p _dist
-          ARTIFACTS_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/repos/candlecorp/wick/actions/runs/4485720507/artifacts | jq -r '.artifacts[].archive_download_url')
+          ARTIFACTS_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts | jq -r '.artifacts[].archive_download_url')
 
           # Print the URLs of the artifacts
           echo "Downloading artifacts from the following URLs:"
@@ -371,7 +371,7 @@ jobs:
           context: .
           file: ./docker/Dockerfile.nightly
           push: true
-          tags: ghcr.io/candlecorp/wick:nightly
+          tags: ghcr.io/fawadasaurus/wick:nightly
           platforms: linux/amd64,linux/arm64
       - name: build and push
         uses: docker/build-push-action@v2
@@ -380,5 +380,5 @@ jobs:
           context: .
           file: ./docker/Dockerfile.latest
           push: true
-          tags: ghcr.io/candlecorp/wick:latest, ghcr.io/candlecorp/wick:${{ inputs.version }}
+          tags: ghcr.io/fawadasaurus/wick:latest, ghcr.io/fawadasaurus/wick:${{ inputs.version }}
           platforms: linux/amd64,linux/arm64
