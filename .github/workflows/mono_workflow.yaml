@@ -40,7 +40,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') == true
         run: |
           cd crates/bins/wick
-          if grep -q "version = '${{ env.GITHUB_REF }}'" Cargo.toml; then
+          if grep -q "version = \"${{ env.GITHUB_REF }}\"" Cargo.toml; then
             echo "Match found!"
           else
             echo "No match found."
