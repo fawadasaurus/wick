@@ -307,7 +307,7 @@ jobs:
       - name: Install jq
         run: sudo apt-get install -y jq
       - name: Download artifacts
-        run: actions/download-artifact@v3
+        uses: actions/download-artifact@v3
         with:
           path: artifacts
       - name: Move artifacts to _dist
