@@ -294,7 +294,7 @@ jobs:
           7z a -tzip wick-${{ matrix.config.name }}-${{ matrix.config.arch }}.zip README.md LICENSE wick.exe
       - name: Upload artifacts (windows)
         if: matrix.config.target == 'x86_64-pc-windows-gnu'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: wick-${{ matrix.config.name }}-${{ matrix.config.arch }}.zip
           path: _dist/wick-${{ matrix.config.name }}-${{ matrix.config.arch }}.zip
@@ -306,37 +306,21 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install jq
         run: sudo apt-get install -y jq
-      - name: Download artifacts into a single directory
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download artifacts
+        run: actions/download-artifact@v3
+        with:
+          path: artifacts
+      - name: Move artifacts to _dist
         working-directory: ${{ github.workspace }}
         run: |
           mkdir -p _dist
-          ARTIFACTS_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts | jq -r '.artifacts[].archive_download_url')
-
-          # Print the URLs of the artifacts
-          echo "Downloading artifacts from the following URLs:"
-          echo "$ARTIFACTS_URL"
-
-          for url in $ARTIFACTS_URL; do
-            curl -L -H "Authorization: token $GITHUB_TOKEN" $url -o artifact.zip
-            
-            echo "Downloaded artifact:"
-            ls -la artifact.zip
-
-            # Print the contents of the downloaded archive file
-            echo "Contents of artifact.zip:"
-            unzip -l artifact.zip
-
-            unzip -j artifact.zip -d _dist
-            rm artifact.zip
+          for dir in artifacts/*/; do
+            # Move the contents of each directory to the destination folder
+            echo "Moving {$dir}"
+            mv "$dir"* _dist/
           done
-
           #Copy the schema manifest into the dist directory
           cp crates/wick/wick-config/json-schema/manifest.json _dist/schema.json
-
-          # Print the contents of the _dist directory
-          echo "Contents of _dist directory:"
           ls -la _dist
       - name: upload release assets (tag)
         uses: svenstaro/upload-release-action@v2
@@ -380,5 +364,5 @@ jobs:
           context: .
           file: ./docker/Dockerfile.latest
           push: true
-          tags: ghcr.io/fawadasaurus/wick:latest, ghcr.io/fawadasaurus/wick:${{ inputs.version }}
+          tags: ghcr.io/fawadasaurus/wick:latest, ghcr.io/fawadasaurus/wick:${{ github.ref_name }}
           platforms: linux/amd64,linux/arm64
